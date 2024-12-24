@@ -7,12 +7,15 @@ export const UPDATE_TODO = 'UPDATE_TODO'
 export const SET_FILTER_BY = 'SET_FILTER_BY'
 export const SET_IS_LOADING = 'SET_IS_LOADING'
 export const UNDO_TODOS = 'UNDO_TODOS'
+export const GET_TODO = 'GET_TODO'
+export const SET_SELECTED_TODO = 'SET_SELECTED_TODO'
 
 const initialState = {
     todos: [],
     filterBy: todoService.getDefaultFilter(),
     isLoading: false,
-    lastTodos: []
+    lastTodos: [],
+    selectedTodo: null
 }
 
 export function todoReducer(state = initialState, cmd = {}) {
@@ -47,6 +50,11 @@ export function todoReducer(state = initialState, cmd = {}) {
             return {
                 ...state,
                 isLoading: cmd.isLoading
+            }
+        case SET_SELECTED_TODO:
+            return {
+                ...state,
+                selectedTodo: cmd.todo
             }
         case UNDO_TODOS:
             return {

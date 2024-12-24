@@ -1,23 +1,26 @@
 import { todoService } from "../services/todo.service.js"
 import { showErrorMsg, showSuccessMsg } from "../services/event-bus.service.js"
+import { getTodo, loadTodos, saveTodo, setTodo } from "../store/actions/todo.actions.js"
 
 const { useState, useEffect } = React
 const { useNavigate, useParams } = ReactRouterDOM
+const { useSelector, useDispatch } = ReactRedux
 
 export function TodoEdit() {
+    const todoToEdit = useSelector(storeState => storeState.todoModule.selectedTodo)
+    const isLoading = useSelector(storeState => storeState.todoModule.isLoading) 
 
-    const [todoToEdit, setTodoToEdit] = useState(todoService.getEmptyTodo())
     const navigate = useNavigate()
     const params = useParams()
 
     useEffect(() => {
-        if (params.todoId) loadTodo()
+        loadTodo()
+         
     }, [])
-
-    function loadTodo() {
-        todoService.get(params.todoId)
-            .then(setTodoToEdit)
-            .catch(err => console.log('err:', err))
+    
+    async function loadTodo() { 
+        await getTodo(params.todoId)
+        showSuccessMsg(`Todo loaded`)
     }
 
     function handleChange({ target }) {
@@ -37,13 +40,14 @@ export function TodoEdit() {
             default:
                 break
         }
-
-        setTodoToEdit(prevTodoToEdit => ({ ...prevTodoToEdit, [field]: value }))
+        console.log(`saving changes`);
+            
+        setTodo({...todoToEdit, [field]: value })
     }
 
     function onSaveTodo(ev) {
         ev.preventDefault()
-        todoService.save(todoToEdit)
+        saveTodo(todoToEdit)
             .then((savedTodo) => {
                 navigate('/todo')
                 showSuccessMsg(`Todo Saved (id: ${savedTodo._id})`)
@@ -54,7 +58,8 @@ export function TodoEdit() {
             })
     }
 
-    const { txt, importance, isDone } = todoToEdit
+        
+    const { txt, importance, isDone } = todoToEdit || {txt:'', importance:'', isDone:''}
 
     return (
         <section className="todo-edit">
